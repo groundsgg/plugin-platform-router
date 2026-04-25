@@ -23,6 +23,11 @@ repositories {
 dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
     kapt("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
+
+    implementation("org.tomlj:tomlj:1.1.1")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin { jvmToolchain(25) }
