@@ -23,12 +23,15 @@ repositories {
 dependencies {
     compileOnly("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
     kapt("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
+    testImplementation("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
 
     implementation("org.tomlj:tomlj:1.1.1")
     implementation("io.fabric8:kubernetes-client:7.4.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.mockito:mockito-core:5.14.2")
 }
 
 kotlin { jvmToolchain(25) }
