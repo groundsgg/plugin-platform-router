@@ -32,6 +32,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
     testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("io.fabric8:kubernetes-server-mock:7.4.0")
+    testImplementation("io.fabric8:mockwebserver:0.2.18")
+    testImplementation("org.awaitility:awaitility:4.2.2")
+    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.16")
 }
 
 kotlin { jvmToolchain(25) }
