@@ -1,3 +1,4 @@
+import com.github.gmazzo.buildconfig.BuildConfigExtension
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -7,6 +8,7 @@ plugins {
     kotlin("kapt") version "2.2.20"
     id("com.gradleup.shadow") version "9.4.1"
     id("com.diffplug.spotless") version "8.4.0"
+    id("com.github.gmazzo.buildconfig") version "6.0.9"
 }
 
 group = "gg.grounds"
@@ -45,6 +47,13 @@ tasks.named<ShadowJar>("shadowJar") {
 tasks.named("build") { dependsOn("shadowJar") }
 
 tasks.named("jar") { enabled = false }
+
+configure<BuildConfigExtension> {
+    className("BuildInfo")
+    packageName("gg.grounds.router")
+    useKotlinOutput()
+    buildConfigField("String", "VERSION", "\"${project.version}\"")
+}
 
 spotless {
     kotlin {
