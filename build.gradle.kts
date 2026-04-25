@@ -25,6 +25,7 @@ dependencies {
     kapt("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
 
     implementation("org.tomlj:tomlj:1.1.1")
+    implementation("io.fabric8:kubernetes-client:7.4.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
