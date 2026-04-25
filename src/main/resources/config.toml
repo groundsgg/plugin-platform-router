@@ -1,0 +1,24 @@
+# plugin-platform-router default config.
+#
+# This file is overridden by the Helm chart in production. The values
+# here are aimed at running the plugin standalone in a per-dev vCluster
+# (platform mode against the `default` namespace).
+
+# Mode selector. "platform" or "staging".
+routerMode = "platform"
+
+# Cluster identifier — populated from GROUNDS_CLUSTER_NAME env by the chart.
+# Used in platform mode to build hostnames. Ignored (warned) in staging mode.
+clusterName = "${GROUNDS_CLUSTER_NAME}"
+
+# Namespace watch scope.
+# Platform: a single namespace name.
+# Staging: a glob (currently honoured client-side as a "preview-" prefix).
+namespaceSelector = "default"
+
+# DNS suffix appended after {fleet}.{cluster} (platform) or
+# {namespace-suffix} (staging).
+hostnameSuffix = "platform.mc.grnds.io"
+
+# Re-sync interval for the informer. Accepts 30s / 5m / 1h.
+resyncInterval = "30s"
