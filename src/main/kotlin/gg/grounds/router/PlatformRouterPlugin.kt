@@ -8,6 +8,12 @@ import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.annotation.DataDirectory
 import com.velocitypowered.api.proxy.ProxyServer
 import gg.grounds.router.config.RouterConfig
+import gg.grounds.router.config.RouterMode
+import gg.grounds.router.k8s.GameServerWatcher
+import gg.grounds.router.velocity.BackendRegistry
+import gg.grounds.router.velocity.PlayerRoutingListener
+import io.fabric8.kubernetes.client.KubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import java.nio.file.Files
 import java.nio.file.Path
 import org.slf4j.Logger
@@ -28,38 +34,79 @@ constructor(
     private val logger: Logger,
     @DataDirectory private val dataDirectory: Path,
 ) {
-    private var config: RouterConfig? = null
+    private var k8sClient: KubernetesClient? = null
+    private var watcher: GameServerWatcher? = null
 
     @Subscribe
     fun onInitialize(event: ProxyInitializeEvent) {
-        val configPath = ensureConfig()
-        config =
+        val config =
             try {
-                RouterConfig.load(configPath, logger).also { cfg ->
-                    logger.info(
-                        "platform-router enabled (version={}, mode={}, namespace={}, hostnameSuffix={}, resync={}s)",
-                        BuildInfo.VERSION,
-                        cfg.routerMode,
-                        cfg.namespaceSelector,
-                        cfg.hostnameSuffix,
-                        cfg.resyncInterval.toSeconds(),
-                    )
-                }
+                RouterConfig.load(ensureConfig(), logger)
+            } catch (t: Throwable) {
+                logger.error("platform-router disabled — invalid config: {}", t.message)
+                return
+            }
+
+        logger.info(
+            "platform-router enabled (version={}, mode={}, namespace={}, hostnameSuffix={}, resync={}s)",
+            BuildInfo.VERSION,
+            config.routerMode,
+            config.namespaceSelector,
+            config.hostnameSuffix,
+            config.resyncInterval.toSeconds(),
+        )
+
+        val client =
+            try {
+                KubernetesClientBuilder().build()
             } catch (t: Throwable) {
                 logger.error(
-                    "platform-router disabled — invalid config at {}: {}",
-                    configPath,
+                    "platform-router disabled — could not build kubernetes client: {}",
                     t.message,
                 )
-                null
+                return
             }
+        k8sClient = client
+
+        val registry =
+            BackendRegistry(
+                proxy = proxy,
+                mode = config.routerMode,
+                clusterName = config.clusterName,
+                hostnameSuffix = config.hostnameSuffix,
+                logger = logger,
+            )
+
+        proxy.eventManager.register(this, PlayerRoutingListener(registry, logger))
+
+        watcher =
+            GameServerWatcher(
+                    client = client,
+                    mode = watchMode(config.routerMode),
+                    namespaceSelector = config.namespaceSelector,
+                    resyncInterval = config.resyncInterval,
+                    onUpsert = { registry.upsert(it) },
+                    onDelete = { key, gsName -> registry.remove(key, gsName) },
+                    logger = logger,
+                )
+                .also { it.start() }
     }
 
     @Subscribe
     fun onShutdown(event: ProxyShutdownEvent) {
-        if (config != null) {
-            logger.info("platform-router disabled")
+        try {
+            watcher?.stop()
+        } catch (t: Throwable) {
+            logger.warn("platform-router: error stopping watcher: {}", t.message)
         }
+        try {
+            k8sClient?.close()
+        } catch (t: Throwable) {
+            logger.warn("platform-router: error closing k8s client: {}", t.message)
+        }
+        watcher = null
+        k8sClient = null
+        logger.info("platform-router disabled")
     }
 
     private fun ensureConfig(): Path {
@@ -74,4 +121,10 @@ constructor(
         }
         return target
     }
+
+    private fun watchMode(mode: RouterMode): GameServerWatcher.WatchMode =
+        when (mode) {
+            RouterMode.PLATFORM -> GameServerWatcher.WatchMode.PLATFORM
+            RouterMode.STAGING -> GameServerWatcher.WatchMode.STAGING
+        }
 }
