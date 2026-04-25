@@ -1,0 +1,11 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  reusable:
+    uses: groundsgg/.github/.github/workflows/gradle-ci.yml@main
