@@ -35,8 +35,18 @@ class GameServerSpec(var ports: List<GameServerPort> = emptyList())
 class GameServerStatus(
     var state: String? = null,
     var address: String? = null,
+    var addresses: List<GameServerAddress> = emptyList(),
     var ports: List<GameServerPort> = emptyList(),
 )
+
+/**
+ * One entry of `GameServer.status.addresses`. Agones publishes the node's addresses (`Hostname`,
+ * `InternalIP`, ...) *and* the game server's own `PodIP` here — the latter is what the proxy wants:
+ * Velocity talks to the game server east-west, inside the cluster, so it needs no host port at all.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+class GameServerAddress(var address: String? = null, var type: String? = null)
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
