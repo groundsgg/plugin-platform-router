@@ -51,12 +51,12 @@ object GameServerExtractor {
      * Velocity reaches a game server east-west, inside the cluster — it never needs the host
      * network — so the pod IP is both sufficient and strictly better: it is what lets the fleets
      * drop `portPolicy: Dynamic` (and with it the hostPort), which on a multi-tenant cluster is a
-     * shared, collidable resource. Each vCluster runs its own Agones over the same 7000-8000
-     * range on the same shared nodes, so two tenants can be handed the same hostPort and the
-     * second game server then sticks in `Pending` forever.
+     * shared, collidable resource. Each vCluster runs its own Agones over the same 7000-8000 range
+     * on the same shared nodes, so two tenants can be handed the same hostPort and the second game
+     * server then sticks in `Pending` forever.
      *
-     * The node-address fallback keeps legacy `Dynamic`/`Static` fleets working unchanged while
-     * they roll over, so this is safe to ship ahead of the chart flip.
+     * The node-address fallback keeps legacy `Dynamic`/`Static` fleets working unchanged while they
+     * roll over, so this is safe to ship ahead of the chart flip.
      */
     private fun resolveBackend(name: String, gs: GameServer): Backend? {
         val podIp = gs.status?.addresses.orEmpty().firstOrNull { it.type == POD_IP }?.address
@@ -83,7 +83,9 @@ object GameServerExtractor {
         // (e.g. `metrics`) must never receive players.
         for (preferred in PREFERRED_PORT_NAMES) {
             val match = ports.firstOrNull { it.name == preferred } ?: continue
-            select(match)?.let { return it }
+            select(match)?.let {
+                return it
+            }
         }
         return null
     }

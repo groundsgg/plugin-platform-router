@@ -39,10 +39,7 @@ class GameServerExtractorTest {
         }
 
     /** What Agones publishes for a `portPolicy: None` fleet: a PodIP, and no allocated hostPort. */
-    private fun podIpFleet(
-        podIp: String? = "10.244.3.7",
-        containerPort: Int? = 25565,
-    ): GameServer =
+    private fun podIpFleet(podIp: String? = "10.244.3.7", containerPort: Int? = 25565): GameServer =
         gs(
             addresses =
                 listOfNotNull(
@@ -102,7 +99,8 @@ class GameServerExtractorTest {
 
     @Test
     fun `GS with neither pod IP nor node address is skipped`() {
-        val view = GameServerExtractor.extract(podIpFleet(podIp = null).apply { status?.address = null })
+        val view =
+            GameServerExtractor.extract(podIpFleet(podIp = null).apply { status?.address = null })
 
         assertNull(view)
     }
