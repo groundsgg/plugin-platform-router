@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/groundsgg/plugin-platform-router/compare/v0.1.0...v0.1.0) (2026-07-11)
+
+
+### Bug Fixes
+
+* **k8s:** route to the GameServer pod IP, not node IP + hostPort ([#13](https://github.com/groundsgg/plugin-platform-router/issues/13)) ([6721354](https://github.com/groundsgg/plugin-platform-router/commit/672135428a8271d10dea6f3b270c31c9e5f890e7))
+
 ## 0.1.0 (2026-04-25)
 
 
